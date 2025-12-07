@@ -1,4 +1,39 @@
+function initEmptySandPositions(x_dim, y_dim) {
+  const arr = new Array(x_dim);
+  for (let i = 0; i < x_dim; i++) {
+    const row = new Array(y_dim);
+    for (let j = 0; j < y_dim; j++) {
+      row[j] = 0;
+    }
+    arr[i] = row;
+  }
+  return arr;
+}
 
+function initCanvas(width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.id = "sandCanvas";
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+const numberOfRows = 500;
+const numberOfColumns = 500;
+const canvas = initCanvas(numberOfColumns, numberOfRows)
+const container = document.getElementById("sandCanvasDiv");
+container.appendChild(canvas);
+let sandPositions = initEmptySandPositions(numberOfRows, numberOfColumns)
+
+function drawCanvas() {
+  for (let x = 0; x < numberOfRows; ++x) {
+    for (let y = 0; y < numberOfColumns; ++y) {
+      if (sandPositions[x][y] !== 0) {
+        const ctx = canvas.getContext("2d");
+        ctx.fillRect(x, y, 10, 10);
+      }
+    }
+  }
+}
 
 function startProcessing(fps, functionToRun) {
   const interval = 1000 / fps;
@@ -19,65 +54,47 @@ function startProcessing(fps, functionToRun) {
 }
 
 
-function simulateGravity(imageData) {
-  const width = imageData.width;
-  const height = imageData.height;
-  const src = imageData.data;
-  const result = new Uint8ClampedArray(src); // copy original data
+function simulateGravity() {
+  const newSandPositions = initEmptySandPositions(numberOfRows, numberOfColumns);
 
-  for (let y = height - 2; y >= 0; y--) {
-    for (let x = 0; x < width; x++) {
-      const i = (y * width + x) * 4;
-      const belowI = ((y + 1) * width + x) * 4;
+  for (let x = 0; x < numberOfRows; ++x) {
+    for (let y = 0; y < numberOfColumns; ++y) {
+      const below = x + 1;
+      if (below >= numberOfRows)
+        continue;
 
-      const isColored = src[i + 3] !== 0; // alpha > 0
-      const belowIsEmpty = src[belowI + 3] === 0;
+      const isSand = sandPositions[x][y] !== 0;
+      const belowIsEmpty = sandPositions[below] === 0;
 
-      if (isColored && belowIsEmpty) {
-        // "Move" the pixel down in the result
-        result[belowI] = src[i];     // R
-        result[belowI + 1] = src[i + 1]; // G
-        result[belowI + 2] = src[i + 2]; // B
-        result[belowI + 3] = src[i + 3]; // A
-
-        // Clear the current pixel
-        result[i] = 0;
-        result[i + 1] = 0;
-        result[i + 2] = 0;
-        result[i + 3] = 0;
+      if (isSand && belowIsEmpty) {
+        newSandPositions[x][y + 1] = 1;
+      } else if (isSand) {
+        newSandPositions[x][y] = 1;
       }
     }
   }
 
-  return result;
+  return newSandPositions;
 }
 
 
 function process() {
-  const sandCanvas = document.getElementById('sandCanvas');
-  const ctx = sandCanvas.getContext("2d");
 
-  const imageData = ctx.getImageData(0, 0, sandCanvas.width, sandCanvas.height);
-  const nextPixels = simulateGravity(imageData);
-
-  const newImageData = new ImageData(nextPixels, sandCanvas.width, sandCanvas.height);
-  ctx.putImageData(newImageData, 0, 0);
+  sandPositions = simulateGravity();
+  drawCanvas();
 }
 
 function main() {
   const sandCanvas = document.getElementById('sandCanvas');
-  const ctx = sandCanvas.getContext("2d");
-
   sandCanvas.addEventListener("mousemove", (e) => {
     const rect = sandCanvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(x, y, 2, 2);
+    const x = Math.floor(e.clientX - rect.left);
+    const y = Math.floor(e.clientY - rect.top);
+    sandPositions[x][y] = 1;
   });
-  startProcessing(60,process);
+  startProcessing(144,process);
   // process();
 }
+
 
 main();
