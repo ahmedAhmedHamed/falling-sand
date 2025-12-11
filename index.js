@@ -1,3 +1,4 @@
+// x is left right, y is up and down.
 function initEmptySandPositions(x_dim, y_dim) {
   const arr = new Array(x_dim);
   for (let i = 0; i < x_dim; i++) {
@@ -25,11 +26,12 @@ container.appendChild(canvas);
 let sandPositions = initEmptySandPositions(numberOfRows, numberOfColumns)
 
 function drawCanvas() {
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let x = 0; x < numberOfRows; ++x) {
     for (let y = 0; y < numberOfColumns; ++y) {
       if (sandPositions[x][y] !== 0) {
-        const ctx = canvas.getContext("2d");
-        ctx.fillRect(x, y, 10, 10);
+        ctx.fillRect(x, y, 3, 3);
       }
     }
   }
@@ -59,27 +61,21 @@ function simulateGravity() {
 
   for (let x = 0; x < numberOfRows; ++x) {
     for (let y = 0; y < numberOfColumns; ++y) {
-      const below = x + 1;
-      if (below >= numberOfRows)
-        continue;
-
+      const below = y + 1;
       const isSand = sandPositions[x][y] !== 0;
-      const belowIsEmpty = sandPositions[below] === 0;
-
-      if (isSand && belowIsEmpty) {
-        newSandPositions[x][y + 1] = 1;
-      } else if (isSand) {
-        newSandPositions[x][y] = 1;
+      const atBottom = below >= numberOfColumns;
+      if (!atBottom && isSand && sandPositions[x][below] === 0) { // in air, can fall
+        newSandPositions[x][below] = sandPositions[x][y];
+      } else { // sitting on another grain of sand.
+        newSandPositions[x][y] = newSandPositions[x][y] || sandPositions[x][y];
       }
     }
   }
-
   return newSandPositions;
 }
 
 
 function process() {
-
   sandPositions = simulateGravity();
   drawCanvas();
 }
