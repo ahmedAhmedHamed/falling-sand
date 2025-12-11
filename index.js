@@ -69,6 +69,17 @@ function startProcessing(fps, functionToRun) {
 }
 
 
+function canFall(x,y) {
+  // if anywhere in the same column is an empty space:
+  // can fall.
+  for (let yy = y; yy < numberOfRows; ++yy) {
+    if (sandPositions[x][yy] === 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function simulateGravity() {
   const newSandPositions = initEmptySandPositions(numberOfRows, numberOfColumns);
 
@@ -77,7 +88,7 @@ function simulateGravity() {
       const below = y + 1;
       const isSand = sandPositions[x][y] !== 0;
       const atBottom = below >= numberOfColumns;
-      if (!atBottom && isSand && sandPositions[x][below] === 0) { // in air, can fall
+      if (!atBottom && isSand && canFall(x,y)) { // in air, can fall
         newSandPositions[x][below] = sandPositions[x][y];
       } else { // sitting on another grain of sand.
         newSandPositions[x][y] = newSandPositions[x][y] || sandPositions[x][y];
@@ -101,7 +112,6 @@ function main() {
     const y = Math.floor(e.clientY - rect.top);
 
     setSquare(sandPositions, x, y, grainSize, 1)
-    sandPositions[x][y] = 1;
   });
   startProcessing(144,process);
   // process();
