@@ -11,6 +11,18 @@ function initEmptySandPositions(x_dim, y_dim) {
   return arr;
 }
 
+function setSquare(matrix, cx, cy, radius, value) {
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+
+  for (let i = cx - radius; i <= cx + radius; i++) {
+    for (let j = cy - radius; j <= cy + radius; j++) {
+      if (i < 0 || i >= rows || j < 0 || j >= cols) continue;
+      matrix[i][j] = value;
+    }
+  }
+}
+
 function initCanvas(width, height) {
   const canvas = document.createElement("canvas");
   canvas.id = "sandCanvas";
@@ -24,6 +36,7 @@ const canvas = initCanvas(numberOfColumns, numberOfRows)
 const container = document.getElementById("sandCanvasDiv");
 container.appendChild(canvas);
 let sandPositions = initEmptySandPositions(numberOfRows, numberOfColumns)
+const grainSize = 5;
 
 function drawCanvas() {
   const ctx = canvas.getContext("2d");
@@ -31,7 +44,7 @@ function drawCanvas() {
   for (let x = 0; x < numberOfRows; ++x) {
     for (let y = 0; y < numberOfColumns; ++y) {
       if (sandPositions[x][y] !== 0) {
-        ctx.fillRect(x, y, 3, 3);
+        ctx.fillRect(x, y, 1, 1);
       }
     }
   }
@@ -86,6 +99,8 @@ function main() {
     const rect = sandCanvas.getBoundingClientRect();
     const x = Math.floor(e.clientX - rect.left);
     const y = Math.floor(e.clientY - rect.top);
+
+    setSquare(sandPositions, x, y, grainSize, 1)
     sandPositions[x][y] = 1;
   });
   startProcessing(144,process);
