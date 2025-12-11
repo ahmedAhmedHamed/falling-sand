@@ -68,27 +68,15 @@ function startProcessing(fps, functionToRun) {
   requestAnimationFrame(update);
 }
 
-
-function canFall(x,y) {
-  // if anywhere in the same column is an empty space:
-  // can fall.
-  for (let yy = y; yy < numberOfRows; ++yy) {
-    if (sandPositions[x][yy] === 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 function simulateGravity() {
   const newSandPositions = initEmptySandPositions(numberOfRows, numberOfColumns);
 
-  for (let x = 0; x < numberOfRows; ++x) {
-    for (let y = 0; y < numberOfColumns; ++y) {
+  for (let x = numberOfRows - 1; x >= 0; --x) {
+    for (let y = numberOfColumns - 1; y >= 0; --y) {
       const below = y + 1;
       const isSand = sandPositions[x][y] !== 0;
       const atBottom = below >= numberOfColumns;
-      if (!atBottom && isSand && canFall(x,y)) { // in air, can fall
+      if (!atBottom && isSand && newSandPositions[x][y + 1] === 0) { // in air, can fall
         newSandPositions[x][below] = sandPositions[x][y];
       } else { // sitting on another grain of sand.
         newSandPositions[x][y] = newSandPositions[x][y] || sandPositions[x][y];
