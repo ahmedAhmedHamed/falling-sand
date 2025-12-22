@@ -104,15 +104,39 @@ function process() {
 
 function main() {
   const sandCanvas = document.getElementById('sandCanvas');
-  sandCanvas.addEventListener("mousemove", (e) => {
-    const rect = sandCanvas.getBoundingClientRect();
-    const x = Math.floor(e.clientX - rect.left);
-    const y = Math.floor(e.clientY - rect.top);
+  function getCanvasPos(canvas, clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.floor(clientX - rect.left),
+      y: Math.floor(clientY - rect.top)
+    };
+  }
 
-    setSquare(sandPositions, x, y, grainSize, Math.random() * 256)
+  function drawAt(x, y) {
+    setSquare(sandPositions, x, y, grainSize, Math.random() * 256);
+  }
+
+  /* Mouse */
+  sandCanvas.addEventListener("mousemove", (e) => {
+    if (e.buttons !== 1) return; // draw only when mouse button held
+    const { x, y } = getCanvasPos(sandCanvas, e.clientX, e.clientY);
+    drawAt(x, y);
+  });
+
+  /* Touch */
+  sandCanvas.addEventListener("touchmove", (e) => {
+    e.preventDefault(); // stop page scrolling
+    const touch = e.touches[0];
+    const { x, y } = getCanvasPos(sandCanvas, touch.clientX, touch.clientY);
+    drawAt(x, y);
+  }, { passive: false });
+
+  sandCanvas.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    const { x, y } = getCanvasPos(sandCanvas, touch.clientX, touch.clientY);
+    drawAt(x, y);
   });
   startProcessing(144,process);
-  // process();
 }
 
 
