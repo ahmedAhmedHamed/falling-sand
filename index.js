@@ -71,15 +71,17 @@ function startProcessing(fps, functionToRun) {
 function simulateGravity() {
   const newSandPositions = initEmptySandPositions(numberOfRows, numberOfColumns);
 
-  for (let x = numberOfRows - 1; x >= 0; --x) {
-    for (let y = numberOfColumns - 1; y >= 0; --y) {
+  for (let x = 0; x < numberOfRows; ++x) {
+    for (let y = 0; y < numberOfColumns; ++y) {
       const below = y + 1;
-      const isSand = sandPositions[x][y] !== 0;
+      const sandValue = sandPositions[x][y];
       const atBottom = below >= numberOfColumns;
-      if (!atBottom && isSand && newSandPositions[x][y + 1] === 0) { // in air, can fall
-        newSandPositions[x][below] = sandPositions[x][y];
-      } else { // sitting on another grain of sand.
-        newSandPositions[x][y] = newSandPositions[x][y] || sandPositions[x][y];
+      if (sandValue !== 0) {
+        if (sandPositions[x][below] === 0) { // in air, can fall
+          newSandPositions[x][below] = sandValue;
+        } else { // sitting on another grain of sand.
+          newSandPositions[x][y] = sandValue;
+        }
       }
     }
   }
