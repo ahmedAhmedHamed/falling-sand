@@ -44,6 +44,9 @@ function drawCanvas() {
   for (let x = 0; x < numberOfRows; ++x) {
     for (let y = 0; y < numberOfColumns; ++y) {
       if (sandPositions[x][y] !== 0) {
+        const value = sandPositions[x][y]
+        ctx.fillStyle = `rgb(${value}, ${255 - value}, 128)`
+
         ctx.fillRect(x, y, 1, 1);
       }
     }
@@ -75,7 +78,6 @@ function simulateGravity() {
     for (let y = 0; y < numberOfColumns; ++y) {
       const belowIdx = y + 1;
       const sandValue = sandPositions[x][y];
-      const atBottom = belowIdx >= numberOfColumns;
       const belowRValue = sandPositions[x + 1][belowIdx];
       const belowLValue = sandPositions[x - 1][belowIdx];
       if (sandValue !== 0) {
@@ -107,7 +109,7 @@ function main() {
     const x = Math.floor(e.clientX - rect.left);
     const y = Math.floor(e.clientY - rect.top);
 
-    setSquare(sandPositions, x, y, grainSize, 1)
+    setSquare(sandPositions, x, y, grainSize, Math.random() * 256)
   });
   startProcessing(144,process);
   // process();
